@@ -1,24 +1,34 @@
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Stores all students and provides search and ranking features. */
+/** Stores all students and provides search, listing and ranking features. */
 public class StudentManager {
-    // Collection: roll number -> Student for fast lookup
-    private final Map<String, Student> students = new HashMap<>();
+    // Collection: USN -> Student for fast lookup (insertion order is kept for listing)
+    private final Map<String, Student> students = new LinkedHashMap<>();
 
-    public void addStudent(String rollNo, String name) {
-        students.put(rollNo, new Student(rollNo, name));
+    /** Adds a student. Returns false if the USN already exists. */
+    public boolean addStudent(Student s) {
+        if (students.containsKey(s.getId())) {
+            return false;
+        }
+        students.put(s.getId(), s);
+        return true;
     }
 
-    /** Finds a student by roll number or throws StudentNotFoundException. */
-    public Student find(String rollNo) throws StudentNotFoundException {
-        Student s = students.get(rollNo);
+    /** Finds a student by USN or throws StudentNotFoundException. */
+    public Student find(String usn) throws StudentNotFoundException {
+        Student s = students.get(usn);
         if (s == null) {
-            throw new StudentNotFoundException("No student with roll number " + rollNo);
+            throw new StudentNotFoundException("No student with USN " + usn);
         }
         return s;
+    }
+
+    /** Returns all students in the order they were added. */
+    public List<Student> getAllStudents() {
+        return new ArrayList<>(students.values());
     }
 
     /**
@@ -26,7 +36,7 @@ public class StudentManager {
      * DSA: our own insertion sort (no Collections.sort / streams).
      */
     public List<Student> getRankList() {
-        List<Student> list = new ArrayList<>(students.values());
+        List<Student> list = getAllStudents();
         for (int i = 1; i < list.size(); i++) {
             Student key = list.get(i);
             int j = i - 1;

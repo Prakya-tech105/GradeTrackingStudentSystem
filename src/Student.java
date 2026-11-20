@@ -1,16 +1,16 @@
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * A student with marks per subject. Inherits id and name from Person.
+ * A student with marks per subject. Inherits personal details from Person.
  * Knows how to compute its own CGPA and print its report card.
  */
 public class Student extends Person {
-    // Collection: subject name -> marks (HashMap keeps lookup by subject easy)
-    private final Map<String, Integer> marks = new HashMap<>();
+    // Collection: subject name -> marks (LinkedHashMap keeps the order subjects were added)
+    private final Map<String, Integer> marks = new LinkedHashMap<>();
 
-    public Student(String rollNo, String name) {
-        super(rollNo, name);
+    public Student(String usn, String name, String dob, String phone, String address, String email) {
+        super(usn, name, dob, phone, address, email);
     }
 
     @Override
@@ -47,18 +47,47 @@ public class Student extends Person {
         return (double) total / marks.size();
     }
 
-    /** Prints the report card to the console. */
+    /** Sum of marks in all subjects. */
+    private int getTotal() {
+        int total = 0;
+        for (int score : marks.values()) total += score;
+        return total;
+    }
+
+    /** Prints the report card in a table layout. */
     public void printReportCard() {
-        System.out.println("\n===== REPORT CARD =====");
-        System.out.println("Roll No : " + getId());
-        System.out.println("Name    : " + getName());
-        System.out.println("-----------------------");
-        for (Map.Entry<String, Integer> e : marks.entrySet()) {
-            System.out.printf("%-12s %3d  (GP %d)%n",
-                    e.getKey(), e.getValue(), gradePoint(e.getValue()));
+        String line = "=".repeat(54);
+        String thin = "-".repeat(54);
+
+        System.out.println("\n" + line);
+        System.out.println("                    REPORT CARD");
+        System.out.println(line);
+        System.out.printf("%-10s: %s%n", "USN", getId());
+        System.out.printf("%-10s: %s%n", "Name", getName());
+        System.out.printf("%-10s: %s%n", "DOB", getDob());
+        System.out.printf("%-10s: %s%n", "Phone", getPhone());
+        System.out.printf("%-10s: %s%n", "Email", getEmail());
+        System.out.printf("%-10s: %s%n", "Address", getAddress());
+        System.out.println(thin);
+
+        if (marks.isEmpty()) {
+            System.out.println("No marks entered yet.");
+            System.out.println(line);
+            return;
         }
-        System.out.println("-----------------------");
-        System.out.printf("CGPA    : %.2f%n", getCgpa());
-        System.out.println("=======================");
+
+        System.out.printf("%-20s %8s %12s %8s%n", "Subject", "Marks", "Grade Point", "Result");
+        System.out.println(thin);
+        for (Map.Entry<String, Integer> e : marks.entrySet()) {
+            int gp = gradePoint(e.getValue());
+            System.out.printf("%-20s %8d %12d %8s%n",
+                    e.getKey(), e.getValue(), gp, gp == 0 ? "FAIL" : "PASS");
+        }
+        System.out.println(thin);
+        int total = getTotal();
+        System.out.printf("%-20s %8d / %d%n", "Total", total, marks.size() * 100);
+        System.out.printf("%-20s %7.2f%%%n", "Percentage", (double) total / marks.size());
+        System.out.printf("%-20s %8.2f%n", "CGPA", getCgpa());
+        System.out.println(line);
     }
 }
