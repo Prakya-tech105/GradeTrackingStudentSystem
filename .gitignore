@@ -1,2 +1,7 @@
+# Compiled files
 out/
+bin/
 *.class
+
+# VS Code settings
+.vscode/
